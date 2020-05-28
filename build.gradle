@@ -1,0 +1,80 @@
+plugins {
+    id "com.github.johnrengelman.shadow" version "5.2.0"
+    id "application"
+    id "org.jetbrains.kotlin.jvm" version "${kotlinVersion}"
+    id "org.openjfx.javafxplugin" version "0.0.8"
+}
+
+
+mainClassName = 'ru.kafkaadmin.Application'
+version "0.1"
+group "ru.kafkaadmin"
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    developmentOnly 
+}
+
+dependencies {
+
+    // kotlin
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}"
+    implementation "org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}"
+
+    // Tornado-f
+    implementation 'no.tornado:tornadofx:1.7.20'
+
+}
+
+javafx {
+    version = "11.0.2"
+    modules = ['javafx.controls', 'javafx.graphics']
+}
+
+test.classpath += configurations.developmentOnly
+
+
+ext {
+
+}
+
+sourceSets {
+    main.java.srcDirs += 'src/main/java'
+    main.kotlin.srcDirs += 'src/main/kotlin'
+    main.resources.srcDirs += 'src/main/resources'
+}
+
+shadowJar {
+    mergeServiceFiles()
+}
+
+tasks.withType(JavaExec) {
+    classpath += configurations.developmentOnly
+    jvmArgs('-noverify', '-XX:TieredStopAtLevel=1', '-Dcom.sun.management.jmxremote')
+}
+
+test {
+    useJUnitPlatform()
+}
+
+compileJava {
+    options.encoding = 'UTF-8'
+}
+
+compileKotlin {
+	kotlinOptions {
+	    jvmTarget = '11'
+	    //Will retain parameter names for Java reflection
+	    javaParameters = true 
+	}
+}
+
+compileTestKotlin {
+	kotlinOptions {
+	    jvmTarget = '11'
+	    javaParameters = true 
+	}
+}
