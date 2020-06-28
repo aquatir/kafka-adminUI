@@ -49,16 +49,21 @@ class MainView : View() {
                 textFill = Color.DEEPPINK
             }
             password = passwordfield {
-                visibleProperty().bind(booleanProperty)
-                managedProperty().bind(booleanProperty)
+                visibleProperty().bind(!booleanProperty)
+                managedProperty().bind(!booleanProperty)
                 requestFocus()
             }
             passwordPlain = textfield {
-                visibleProperty().bind(!booleanProperty)
-                managedProperty().bind(!booleanProperty)
+                visibleProperty().bind(booleanProperty)
+                managedProperty().bind(booleanProperty)
             }
+            booleanProperty.set(false)
             checkbox("show", booleanProperty)
+
+            passwordPlain.textProperty().bindBidirectional(password.textProperty())
         }
+
+
         hbox {
             label("Favourite color") { textFill = Color.DARKGREEN }
             combobox(values = colors, property = colorPicked)
@@ -102,8 +107,6 @@ class MainView : View() {
             readonlyColumn("Birthday", Person::birthday)
             readonlyColumn("Age",Person::age)
         }
-
-        passwordPlain.textProperty().bindBidirectional(password.textProperty())
     }
 //    override val root = vbox {
 //        add(TopView::class)
