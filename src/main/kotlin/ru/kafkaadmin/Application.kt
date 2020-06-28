@@ -5,10 +5,12 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.scene.control.PasswordField
+import javafx.scene.control.SelectionMode
 import javafx.scene.control.TextField
 import javafx.scene.paint.Color
 import tornadofx.*
 import java.time.LocalDate
+import java.time.Period
 
 
 fun main(args: Array<String>) {
@@ -78,6 +80,29 @@ class MainView : View() {
             shortcut("ENTER")
         }
 
+        listview<String> {
+            items.add("Alpha")
+            items.add("Beta")
+            items.add("Gamma")
+            items.add("Delta")
+            items.add("Epsilon")
+            selectionModel.selectionMode = SelectionMode.MULTIPLE
+        }
+
+        val persons = listOf(
+                Person(1,"Samantha Stuart",LocalDate.of(1981,12,4)),
+                Person(2,"Tom Marks",LocalDate.of(2001,1,23)),
+                Person(3,"Stuart Gills",LocalDate.of(1989,5,23)),
+                Person(3,"Nicole Williams",LocalDate.of(1998,8,11))
+        ).asObservable()
+
+        tableview(persons) {
+            column("ID",Person::id).makeEditable()
+            readonlyColumn("Name", Person::name)
+            readonlyColumn("Birthday", Person::birthday)
+            readonlyColumn("Age",Person::age)
+        }
+
         passwordPlain.textProperty().bindBidirectional(password.textProperty())
     }
 //    override val root = vbox {
@@ -128,6 +153,13 @@ class MainView : View() {
 
 // TaskStatus ViewModel - display progress bar
 
+class Person(id: Int, val name: String, val birthday: LocalDate) {
+
+    var id by property(id)
+    fun idProperty() = getProperty(Person::id)
+
+    val age: Int get() = Period.between(birthday, LocalDate.now()).years
+}
 
 class TopView : View() {
     override val root = label("Top view")
