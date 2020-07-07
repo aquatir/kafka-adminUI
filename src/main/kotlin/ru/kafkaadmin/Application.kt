@@ -7,6 +7,7 @@ import javafx.collections.FXCollections
 import javafx.scene.control.PasswordField
 import javafx.scene.control.SelectionMode
 import javafx.scene.control.TextField
+import javafx.scene.control.TreeItem
 import javafx.scene.paint.Color
 import tornadofx.*
 import java.time.LocalDate
@@ -17,7 +18,11 @@ fun main(args: Array<String>) {
     launch<MyApp>(args)
 }
 
-class MyApp : App(MainView::class)
+class MyApp : App(MainView::class, MyStyle::class) {
+    init {
+        reloadStylesheetsOnFocus()
+    }
+}
 
 class MainView : View() {
     // val bottomView: BottomView by inject()
@@ -83,6 +88,7 @@ class MainView : View() {
                 println("Logging is with login '${login.text}' and password '${password.text}' and color: '${colorPicked.get()}' and DOB: '${userBirthDate.get()}'")
             }
             shortcut("ENTER")
+            addClass(MyStyle.tackyButton)
         }
 
         listview<String> {
@@ -105,52 +111,32 @@ class MainView : View() {
             column("ID",Person::id).makeEditable()
             readonlyColumn("Name", Person::name)
             readonlyColumn("Birthday", Person::birthday)
-            readonlyColumn("Age",Person::age)
+            readonlyColumn("Age",Person::age).cellFormat {
+                text = it.toString()
+                style {
+                    backgroundColor += if (it < 25) {
+                        Color.RED
+                    } else {
+                        Color.GREEN
+                    }
+                }
+            }
+        }
+
+        val tableData = mapOf(
+                "Fruit" to arrayOf("apple", "pear", "Banana"),
+                "Veggies" to arrayOf("beans", "cauliflower", "cale"),
+                "Meat" to arrayOf("poultry", "pork", "beef")
+        )
+
+        treetableview<String>(TreeItem("Items")) {
+            column<String, String>("Type", { it.value.valueProperty() })
+            populate {
+                if (it.value == "Items") tableData.keys
+                else tableData[it.value]?.asList()
+            }
         }
     }
-//    override val root = vbox {
-//        add(TopView::class)
-//        button("Press Me") {
-//            action {
-//                openInternalWindow<TopView>()
-//            }
-//        }
-//    }
-
-//    override val root = vbox {
-//        label("My items")
-//        listview(model.values)
-//
-//        button("Reset pick") {
-//            action {
-//                runAsync {
-//                    println("kek")
-//                } ui {
-//                    if (model.values.isNotEmpty()) model.values.remove(model.values.last())
-//                }
-//            }
-//        }
-//    }
-
-//    override val root = form {
-//
-//        fieldset {
-//            field("input") {
-//                textfield(input)
-//            }
-//
-//            button("Action!") {
-//                action {
-//                    controller.writeStuff(input.value)
-//                    input.value = ""
-//                }
-//            }
-//        }
-//
-////        top<TopView>()
-////        bottom<BottomView>()
-//    }
-
 }
 
 
@@ -158,7 +144,7 @@ class MainView : View() {
 
 class Person(id: Int, val name: String, val birthday: LocalDate) {
 
-    var id by property(id)
+    var id: Int by property(id)
     fun idProperty() = getProperty(Person::id)
 
     val age: Int get() = Period.between(birthday, LocalDate.now()).years
